@@ -11,42 +11,40 @@ import org.springframework.data.annotation.LastModifiedDate;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion;
 
-
-
-
-@JsonSerialize(include=Inclusion.NON_NULL)
+@SuppressWarnings("deprecation")
+@JsonSerialize(include = Inclusion.NON_NULL)
 public class Order {
 
-    @Id
-    public String id;
-    public String itemName;
-    public String price;
-    public String status;
-    public String staffDeatils;
-    public String remarks;
-    public String reminder;
-    public Boolean isAutopost;    
-    
-    
-    @CreatedBy
-    private String createUser;
+	@Id
+	public String id;
+	public String itemName;
+	public String price;
+	public String status;
+	public String staffDeatils;
+	public String remarks;
+	public String reminder;
+	public Boolean isAutopost;
 
-    @CreatedDate
-    private Date createdDate;
-    
-    @LastModifiedBy
-    private String lastModifiedUser;
-    
-    @LastModifiedDate
-    private Date updateDttm;
-    
-    public Order() {}
+	@CreatedBy
+	private String createUser;
 
-    public Order(String itemName, String price) {
-        this.price = price;
-        this.itemName = itemName;
-        this.status="Created";
-    }
+	@CreatedDate
+	private Date createdDate;
+
+	@LastModifiedBy
+	private String lastModifiedUser;
+
+	@LastModifiedDate
+	private Date updateDttm;
+
+	public Order() {
+	}
+
+	public Order(String itemName, String price) {
+		this.price = price;
+		this.itemName = itemName;
+		this.status = "Created";
+	}
 
 	public String getId() {
 		return id;
@@ -55,8 +53,6 @@ public class Order {
 	public void setId(String id) {
 		this.id = id;
 	}
-
-	
 
 	public String getCreateUser() {
 		return createUser;
@@ -89,8 +85,6 @@ public class Order {
 	public void setUpdateDttm(Date updateDttm) {
 		this.updateDttm = updateDttm;
 	}
-	
-	
 
 	public String getStatus() {
 		return status;
@@ -115,8 +109,6 @@ public class Order {
 	public void setPrice(String price) {
 		this.price = price;
 	}
-
-	
 
 	public String getRemarks() {
 		return remarks;
@@ -158,8 +150,4 @@ public class Order {
 				+ lastModifiedUser + ", updateDttm=" + updateDttm + "]";
 	}
 
-	
-
-	
 }
-

@@ -1,6 +1,5 @@
 package org.ghk.dc.orderservice.repository;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.ghk.dc.orderservice.domain.Order;
