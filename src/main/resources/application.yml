@@ -1,0 +1,8 @@
+javers:
+  mongodb:
+    uri: mongodb://localhost:27017/ordersAudit        
+spring: 
+  data:
+   mongodb:
+    uri: mongodb://localhost:27017/orders
+   
