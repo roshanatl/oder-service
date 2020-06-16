@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 @JaversSpringDataAuditable
 public interface OrderRepository extends MongoRepository<Order, String> {
 
-    public Order findByItemName(String itemName);
+   
     public List<Order> findByStatus(String status);    
     
 	

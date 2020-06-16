@@ -7,11 +7,16 @@ import java.util.List;
 import java.util.Optional;
 
 import org.ghk.dc.orderservice.domain.Order;
+import org.ghk.dc.orderservice.domain.StaffDetails;
 import org.ghk.dc.orderservice.repository.OrderRepository;
 import org.javers.core.Javers;
+import org.javers.core.diff.Change;
 import org.javers.core.metamodel.object.CdoSnapshot;
 import org.javers.core.metamodel.object.CdoSnapshotState;
+import org.javers.core.metamodel.object.GlobalId;
+import org.javers.core.metamodel.object.GlobalIdFactory;
 import org.javers.repository.jql.QueryBuilder;
+import org.javers.shadow.Shadow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +26,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.google.gson.JsonObject;
 
 @RestController
 public class OrderController {
@@ -59,7 +66,7 @@ public class OrderController {
 			Optional<Order>  myOrderCurrent=orderRepository.findById(id);
 			myOrder = myOrderCurrent.get();
 			myOrder.setStatus(order.getStatus());
-			myOrder.setStaffDeatils(order.getStaffDeatils());
+			myOrder.setStaffDetails(order.getStaffDetails());
 			myOrder=orderRepository.save(myOrder)	;
 			
 		} catch (Exception e) {
@@ -82,42 +89,49 @@ public class OrderController {
 	        return orderRepository.findById(id);
 	    }
 	
-	@GetMapping(value= "/orderHistory/{order-id}")
+	@GetMapping(value= "/order/history/{order-id}")
 	public List<Order> getHistory(@PathVariable(value= "order-id") String id) {
 		 QueryBuilder jqlQuery = QueryBuilder.byInstanceId(id, Order.class)
 	                .withNewObjectChanges();
 
 	        //Changes changes = javers.findChanges(jqlQuery.build());
-	        List<CdoSnapshot> snapshots= javers.findSnapshots(jqlQuery.build());
-	        List<Order> orders=mapOrder(snapshots);
+	        List<Shadow<Order>> shadowOrders= javers.findShadows(jqlQuery.build());
+	        List<Order> orders=mapOrder(shadowOrders);
 	        
 	        return orders;
 
 	        //return "<pre>" + changes.prettyPrint() + "</pre>";
 	}
 	
-	private List<Order> mapOrder(List<CdoSnapshot> snapshots){
+	
+	@GetMapping(value= "/order/snapshots/{order-id}")
+	public String getSnapshots(@PathVariable(value= "order-id") String id) {
+		
+		
+		 QueryBuilder jqlQuery = QueryBuilder.byClass(Order.class);
+
+	        //Changes changes = javers.findChanges(jqlQuery.build());
+	        List<CdoSnapshot> snapShortOrders= javers.findSnapshots(jqlQuery.build());
+	        return javers.getJsonConverter().toJson(snapShortOrders);	        
+	     
+	}
+	
+	 @GetMapping(value= "/order/audit/{order-id}")
+	 public String getAuditChanges(@PathVariable(value= "order-id") String id) {
+		 QueryBuilder jqlQuery = QueryBuilder.byInstanceId(id, Order.class);
+
+	        List<Change> changes = javers.findChanges(jqlQuery.build());
+
+	        return javers.getJsonConverter().toJson(changes);
+	    }
+	
+
+	
+	private List<Order> mapOrder( List<Shadow<Order>> shadowOrders){
 		
 		List<Order> orderList= new ArrayList<>();
-		for(CdoSnapshot person : snapshots) {
-			Order order= new Order();
-        	CdoSnapshotState orderState=person.getState();
-        	if(null!=orderState.getPropertyValue("itemName")) {
-        		order.setItemName((String) orderState.getPropertyValue("itemName"));
-        	}
-        	        	
-        	if(null!=orderState.getPropertyValue("status")) {
-        		order.setStatus((String) orderState.getPropertyValue("status"));
-        	}
-        	
-        	if(null!=orderState.getPropertyValue("staffDeatils")) {
-        		order.setStaffDeatils((String) orderState.getPropertyValue("staffDeatils"));
-        	}
-        	
-        	if(null!=orderState.getPropertyValue("updateDttm")) {
-        		order.setUpdateDttm((Date) orderState.getPropertyValue("updateDttm"));
-        	}
-        	orderList.add(order);
+		for(Shadow<Order> shadowOrder : shadowOrders) {		       	
+        	orderList.add(shadowOrder.get());
         }
 		return orderList;
 	}
